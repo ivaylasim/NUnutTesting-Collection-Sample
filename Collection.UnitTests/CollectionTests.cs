@@ -1,4 +1,6 @@
 using Collections;
+using NUnit.Framework.Constraints;
+using NUnit.Framework.Interfaces;
 
 namespace Collection.UnitTests
 {
@@ -92,6 +94,49 @@ namespace Collection.UnitTests
             var coll = new Collection<int>(1, 2);
             coll.Clear();
             Assert.That(coll.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Test_AddRangeWithGrow()
+        {
+            Collection<int> coll = new Collection<int>(1, 2);
+
+            Assert.That(coll.Count, Is.EqualTo(2), "Count");
+            Assert.That(coll.Capacity, Is.GreaterThanOrEqualTo(1));
+
+            for (int i = 0; i < 50; i++)
+                {
+                    coll.Add(i);
+                }
+
+            Assert.That(coll.Count, Is.EqualTo(52));
+            Assert.That(coll.Capacity, Is.GreaterThanOrEqualTo(52));
+            var expected = "[1, 2, " + String.Join(", ", Enumerable.Range(0, 50).ToArray()) + "]";
+            Assert.That(expected, Is.EqualTo(coll.ToString()));
+         }
+
+            [Category ("DDTest")]
+        [TestCase("Peter,Maria,Ivan", 0, "Peter")]
+        [TestCase("Peter,Maria,Ivan", 1, "Maria")]
+        [TestCase("Peter,Maria,Ivan", 2, "Ivan")]
+        [TestCase("Peter", 0, "Peter")]
+        public void Test_Collection_GetByValidIndex(string data, int index, string expected)
+        {
+            var coll = new Collection<string>(data.Split(","));
+            var actual = coll[index];
+
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+            [Category("DDTest with lambda expression")]
+        [TestCase("Peter", -1)]
+        [TestCase("Peter,Maria,Ivan", -1)]
+        [TestCase("Peter,Maria,Ivan", 3)]
+        public void Test_Collection_GetByInvalidIndex(string data, int index)
+        {
+            var coll = new Collection<string>(data.Split(",",StringSplitOptions.RemoveEmptyEntries));
+            
+            Assert.That(() => coll[index], Throws.TypeOf<ArgumentOutOfRangeException>());
         }
 
 
